@@ -1,0 +1,31 @@
+
+public class LinkedList {
+    public static void main(String[] args) {
+        
+        Node[] arr = new Node[6];
+
+        arr[0] = new Node(8, 0);
+        arr[1] = new Node(4, 1);
+        arr[2] = new Node(5, 2);
+        arr[3] = new Node(6, 3);
+        arr[4] = new Node(9, 4);
+        arr[5] = new Node(1, 5);
+
+       
+        for (int i = 0; i < arr.length - 1; i++) {
+            for (int j = i + 1; j < arr.length; j++) {
+                if (arr[i].data > arr[j].data) {
+                    Node temp = arr[i];
+                    arr[i] = arr[j];
+                    arr[j] = temp;
+                }
+            }
+        }
+
+      
+        System.out.println("Data\tIndex");
+        for (int i = 0; i < arr.length; i++) {
+            System.out.println(arr[i].data + "\t" + arr[i].index);
+        }
+    }
+}
