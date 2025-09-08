@@ -1,0 +1,80 @@
+import java.io.*;
+import java.net.*;
+
+public class Server2_1mt {
+    public static void main(String[] args) throws Exception {
+        ServerSocket serverSocket = new ServerSocket(9091);
+        System.out.println("Server started...");
+
+        while (true) {
+            System.out.println("Waiting for client...");
+            Socket socket = serverSocket.accept();
+            System.out.println("Client connected!");
+
+            Thread clientThread = new Thread(new ClientHandler(socket));
+            clientThread.start();
+        }
+    }
+}
+
+class ClientHandler implements Runnable {
+    private Socket socket;
+
+    public ClientHandler(Socket socket) {
+        this.socket = socket;
+    }
+
+    @Override
+    public void run() {
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+
+            Thread reader = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String msg;
+                        while ((msg = in.readLine()) != null) {
+                            if (msg.equalsIgnoreCase("quit")) {
+                                System.out.println("Client left the chat.");
+                                socket.close();
+                                break;
+                            }
+                            System.out.println("Client: " + msg);
+                        }
+                    } catch (IOException e) {
+                    }
+                }
+            });
+
+            Thread writer = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String msg;
+                        while ((msg = console.readLine()) != null) {
+                            out.println(msg);
+                            if (msg.equalsIgnoreCase("quit")) {
+                                System.out.println("Server closed the chat.");
+                                socket.close();
+                                break;
+                            }
+                        }
+                    } catch (IOException e) {
+                    }
+                }
+            });
+
+            reader.start();
+            writer.start();
+
+            reader.join();
+            writer.join();
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
